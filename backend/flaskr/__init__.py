@@ -6,40 +6,78 @@ import random
 
 from models import setup_db, Question, Category
 
+# define var to represent questions per page
 QUESTIONS_PER_PAGE = 10
+
+# function to implement pagination
+def paginate_questions(request, selection):
+  page = request.args.get('page', 1, type=int)
+  start = (page - 1) * QUESTIONS_PER_PAGE # begin at 0
+  end = start + QUESTIONS_PER_PAGE # grab 10
+  
+  questions = [question.format() for question in selection]
+  current_questions = questions[start:end]
+
+  return current_questions
 
 def create_app(test_config=None):
   # create and configure the app
   app = Flask(__name__)
   setup_db(app)
-  
-  '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
-  '''
+  CORS(app, resources={"/": {"origins": "*"}})
 
-  '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
-  '''
+  # utilize the after_request decorator to set Access-Control-Allow
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, true')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, PATCH, PUT, POST, DELETE, OPTIONS')
+    return response
 
-  '''
-  @TODO: 
-  Create an endpoint to handle GET requests 
-  for all available categories.
-  '''
+  # endpoint to handle GET requests for all available categories
+  @app.route('/categories')
+  def get_categories():
+    # obtain all the categories
+    data = Category.query.all()
+    categories = {}
+    for category in data:
+      categories[category.id] = category.type
 
+    if len(data) == 0:
+      abort(404)
 
-  '''
-  @TODO: 
-  Create an endpoint to handle GET requests for questions, 
-  including pagination (every 10 questions). 
-  This endpoint should return a list of questions, 
-  number of total questions, current category, categories. 
+    return jsonify({
+      'success': True,
+      'categories': categories
+    })
 
-  TEST: At this point, when you start the application
-  you should see questions and categories generated,
-  ten questions per page and pagination at the bottom of the screen for three pages.
-  Clicking on the page numbers should update the questions. 
-  '''
+  # endpoint to handle GET requests for questions
+  @app.route('/questions') # components/QuestionView.js
+  def get_questions():
+    # get all questions and paginate
+    selection = Question.query.all()
+    # obtain a count of the total number of questions
+    total_questions = len(selection)
+    # paginate by every (10) questions, return list
+    current_questions = paginate_questions(request, selection)
+
+    # get all categories
+    categories = Category.query.all()
+    categories_dict = {}
+    for category in categories:
+        categories_dict[category.id] = category.type
+
+    # abort 404 if no questions
+    if (len(current_questions) == 0):
+        abort(404)
+
+    # return data to view
+    return jsonify({
+        'success': True,
+        'questions': current_questions,
+        'total_questions': total_questions,
+        'categories': categories_dict
+    })
+
 
   '''
   @TODO: 
