@@ -87,7 +87,8 @@ def create_app(test_config=None):
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_question(question_id):
         try:
-            question = Question.query.filter(Question.id == question_id).one_or_none()
+            question = Question.query.filter(
+                Question.id == question_id).one_or_none()
 
             if question is None:
                 abort(404)
@@ -111,6 +112,53 @@ def create_app(test_config=None):
 
         except:
             abort(422)
+
+    # endpoint to POST a new question, which will require the question and answer text, category, and difficulty score.
+    @app.route("/questions", methods=["POST"])
+    def add_question():
+        # obtain data from form
+        body = request.get_json()
+        new_question = body.get("question", None)
+        new_answer = body.get("answer", None)
+        new_difficulty = body.get("difficulty", None)
+        new_category = body.get("category", None)
+
+        # ensure data isn't empty
+        if not new_question:
+            abort(422)
+
+        if not new_answer:
+            abort(422)
+
+        if not new_difficulty:
+            abort(422)
+
+        if not new_category:
+            abort(422)
+
+        try:
+            question = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
+            question.insert()
+
+            # get all questions
+            selection = Question.query.order_by(Question.id).all()
+            # paginate by every (10) questions, return list
+            current_questions = paginate_questions(request, selection)
+            # obtain a count of the total number of questions
+            total_questions = len(selection)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "created": question.id,
+                    "questions": current_questions,
+                    "total_questions": total_questions
+                }
+            )
+
+        except:
+            abort(422)
+
     '''
   @TODO: 
   Create an endpoint to POST a new question, 
@@ -159,5 +207,28 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "resource not found"
+        }), 404
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "unprocessable"
+        }), 422
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "bad request"
+        }), 400
 
     return app
