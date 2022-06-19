@@ -11,8 +11,6 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 
 # function to implement pagination
-
-
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE  # begin at 0
@@ -85,7 +83,7 @@ def create_app(test_config=None):
         })
 
     # endpoint to DELETE question using a question ID.
-    @app.route("/questions/<int:question_id>", methods=["DELETE"])
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         try:
             question = Question.query.filter(
@@ -115,7 +113,7 @@ def create_app(test_config=None):
             abort(422)
 
     # endpoint to POST a new question, which will require the question and answer text, category, and difficulty score.
-    @app.route("/questions", methods=["POST"])
+    @app.route('/questions', methods=['POST'])
     def add_question():
         # obtain data from form
         body = request.get_json()
@@ -161,16 +159,33 @@ def create_app(test_config=None):
         except:
             abort(422)
 
-    '''
-  @TODO: 
-  Create a POST endpoint to get questions based on a search term. 
-  It should return any questions for whom the search term 
-  is a substring of the question. 
+    # a POST endpoint to get questions based on a given search term
+    @app.route("/questions/search", methods=["POST"])
+    def get_by_search_term():
+      # obtain search term
+      body = request.get_json()
+      search_term = body.get("searchTerm", None)
 
-  TEST: Search by any phrase. The questions list will update to include 
-  only question that include that string within their question. 
-  Try using the word "title" to start. 
-  '''
+      try: 
+        if search_term:
+          # return any questions for whom the search term is a substring of the question
+          selection = Question.query.filter(
+                Question.question.ilike(f'%{search_term}%')).all()
+          # paginate by every (10) questions, return list
+          current_questions = paginate_questions(request, selection)
+          # obtain a count of the total number of questions
+          total_questions = len(selection)
+
+          return jsonify(
+                  {
+                      "success": True,
+                      "questions": current_questions,
+                      "total_questions": total_questions
+                  }
+              )
+      except:
+        abort(422)
+      
 
     # a GET endpoint to get questions based on category
     @app.route("/categories/<int:category_id>/questions")
