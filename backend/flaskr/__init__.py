@@ -1,4 +1,5 @@
 import os
+from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -137,7 +138,8 @@ def create_app(test_config=None):
             abort(422)
 
         try:
-            question = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
+            question = Question(question=new_question, answer=new_answer,
+                                difficulty=new_difficulty, category=new_category)
             question.insert()
 
             # get all questions
@@ -161,17 +163,6 @@ def create_app(test_config=None):
 
     '''
   @TODO: 
-  Create an endpoint to POST a new question, 
-  which will require the question and answer text, 
-  category, and difficulty score.
-
-  TEST: When you submit a question on the "Add" tab, 
-  the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.  
-  '''
-
-    '''
-  @TODO: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -181,14 +172,30 @@ def create_app(test_config=None):
   Try using the word "title" to start. 
   '''
 
-    '''
-  @TODO: 
-  Create a GET endpoint to get questions based on category. 
+    # a GET endpoint to get questions based on category
+    @app.route("/categories/<int:category_id>/questions")
+    def get_by_category(category_id):
+        try:
+            # query based on category id
+            selection = Question.query.filter(
+                Question.category == str(category_id)).all()
 
-  TEST: In the "List" tab / main screen, clicking on one of the 
-  categories in the left column will cause only questions of that 
-  category to be shown. 
-  '''
+            # paginate by every (10) questions, return list
+            current_questions = paginate_questions(request, selection)
+
+            # obtain a count of the total number of questions
+            total_questions = len(selection)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "questions": current_questions,
+                    "total_questions": total_questions,
+                    "current_category": category_id
+                }
+            )
+        except:
+            abort(404)
 
     '''
   @TODO: 
@@ -202,11 +209,7 @@ def create_app(test_config=None):
   and shown whether they were correct or not. 
   '''
 
-    '''
-  @TODO: 
-  Create error handlers for all expected errors 
-  including 404 and 422. 
-  '''
+    # error handlers for all expected errors
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
