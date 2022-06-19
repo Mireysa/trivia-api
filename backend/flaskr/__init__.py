@@ -5,6 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
+from sqlalchemy import func
+
 from models import setup_db, Question, Category
 
 # define var to represent questions per page
@@ -160,7 +162,7 @@ def create_app(test_config=None):
             abort(422)
 
     # a POST endpoint to get questions based on a given search term
-    @app.route("/questions/search", methods=["POST"])
+    @app.route('/questions/search', methods=['POST'])
     def get_by_search_term():
       # obtain search term
       body = request.get_json()
@@ -188,7 +190,7 @@ def create_app(test_config=None):
       
 
     # a GET endpoint to get questions based on category
-    @app.route("/categories/<int:category_id>/questions")
+    @app.route('/categories/<int:category_id>/questions')
     def get_by_category(category_id):
         try:
             # query based on category id
@@ -212,18 +214,42 @@ def create_app(test_config=None):
         except:
             abort(404)
 
-    '''
-  @TODO: 
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
+    # a POST endpoint to get questions to play the quiz
+    @app.route('/quizzes', methods=['POST'])
+    def quizzes():
+      try:
+        # obtain category and previous questions via json
+        body = request.get_json()
+        quiz_category = body.get('quiz_category')
+        previous_questions = body.get('previous_questions')
 
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
-  '''
+        # return a random question within the given category that is not one of the previous questions
+        if quiz_category['id'] == 0:
+          # if category is 0, it means ALL
+          print(quiz_category['id']) # testing
+          set_of_questions = Question.query.filter(Question.id.notin_((previous_questions))).all()
+        else: 
+          # if category is not 0, take the category id
+          print(quiz_category['id']) # testing
+          set_of_questions = Question.query.filter_by(category = quiz_category['id']).filter(Question.id.notin_((previous_questions))).all()
 
+        if len(set_of_questions) == 0:
+          # if the quiz is over b/c we ran out of questions, return none to end the quiz
+          return jsonify({
+            "success": True,
+            "question": None
+          })
+        else:
+          # if the quiz is not over, return a random question from the set
+          next_question = random.choice(set_of_questions).format()
+          return jsonify({
+            "success": True,
+            "question": next_question
+          })
+
+      except:
+        abort(422)
+      
     # error handlers for all expected errors
     @app.errorhandler(404)
     def not_found(error):
