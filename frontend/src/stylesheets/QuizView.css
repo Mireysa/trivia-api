@@ -16,16 +16,19 @@
 }
 
 .play-category:hover {
-    color: dodgerblue;
+    color: #de8689;
 }
 
 .button {
     width: 100px;
     margin-top: 5px;
-    background-color: dodgerblue;
+    background-color: #b9bd60;
     color: white;
-    padding: 3px 5px;
     align-self: center;
+    border: 2px #f0e8e4 solid;
+    font-size: 15px;
+    padding: 5px;
+    text-align: center;
 }
 
 div.button {
@@ -39,9 +42,9 @@ div.button {
 }
 
 .correct {
-    color: green;
+    color: #dae5b2;
 }
 
 .wrong {
-    color: red;
+    color: #f4c6c0;
 }
