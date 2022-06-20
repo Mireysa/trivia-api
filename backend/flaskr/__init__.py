@@ -251,7 +251,7 @@ def create_app(test_config=None):
           })
 
       except:
-        abort(422)
+        abort(400)
       
     # error handlers for all expected errors
     @app.errorhandler(404)
