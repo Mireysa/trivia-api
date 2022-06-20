@@ -8,6 +8,9 @@ A trivia game with the intent to create bonding experiences. The application is 
 5. Play the quiz game, randomizing either all questions or within a specific category.
 
 ## Screenshots
+<img src="screenshots/list.png" width = "700"> 
+
+<img src="screenshots/add.png" width = "350"> <img src="screenshots/play.png" width = "350">
 
 ## About the Stack
 ### Backend Dependencies
