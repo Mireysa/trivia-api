@@ -70,7 +70,10 @@ python test_flaskr.py
 - **400** - bad request
 
 #### Error Messages
-Error messages are returned as JSON objects. See the following example:
+Error messages are returned as JSON objects. <br>
+**Example:** `curl http://127.0.0.1:5000/secretpage`
+
+**Response:**
 ```bash
 {
   "error": 404, 
@@ -79,7 +82,173 @@ Error messages are returned as JSON objects. See the following example:
 }
 ```
 ### Resource Endpoint Library 
-in progress...
+#### GET '/categories'
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Request Arguments: None
+- Returns: An object with a two keys, categories, that contains an object of id: category_string key:value pairs and success. 
+
+**Example of Usage:** `curl http://127.0.0.1:5000/categories`
+
+**Response:**
+```bash
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "success": true
+}
+```
+
+#### GET '/questions?page=${integer}'
+- Fetches a paginated set of questions, a total number of questions, all categories and current category string. 
+- Request Arguments: page - integer
+- Returns: An object with 10 paginated questions, total questions, object including all categories, and current category string
+
+**Example of Usage:** `curl http://127.0.0.1:5000/questions?page=2`
+
+**Response:**
+```bash
+{
+    'questions': [
+        {
+            'id': 1,
+            'question': 'This is a question',
+            'answer': 'This is an answer', 
+            'difficulty': 5,
+            'category': 2
+        },
+    ],
+    'totalQuestions': 100,
+    'categories': { '1' : "Science",
+    '2' : "Art",
+    '3' : "Geography",
+    '4' : "History",
+    '5' : "Entertainment",
+    '6' : "Sports" },
+    'currentCategory': 'History'
+}
+```
+
+#### GET '/categories/${id}/questions'
+- Fetches questions for a cateogry specified by id request argument 
+- Request Arguments: id - integer
+- Returns: An object with questions for the specified category, total questions, and current category string
+
+**Example of Usage:** `curl http://127.0.0.1:5000/categories/2/questions`
+
+**Response:**
+```bash
+{
+    'questions': [
+        {
+            'id': 1,
+            'question': 'This is a question',
+            'answer': 'This is an answer', 
+            'difficulty': 5,
+            'category': 4
+        },
+    ],
+    'totalQuestions': 100,
+    'currentCategory': 'History'
+}
+```
+
+#### DELETE '/questions/${id}'
+- Deletes a specified question using the id of the question
+- Request Arguments: id - integer
+- Returns: Does not need to return anything besides the appropriate HTTP status code. Optionally can return the id of the question. If you are able to modify the frontend, you can have it remove the question using the id instead of refetching the questions. 
+
+**Example of Usage:** `curl -X DELETE http://127.0.0.1:5000/questions/5`
+
+**Response:**
+
+```bash
+{
+  "deleted": 5, 
+  "questions": [
+    {
+      "answer": "Tom Cruise", 
+      "category": "5", 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }, 
+    {
+      "answer": "Edward Scissorhands", 
+      "category": "5", 
+      "difficulty": 3, 
+      "id": 6, 
+      "question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+    }
+  ], 
+  "success": true, 
+  "total_questions": 16
+}
+```
+
+#### POST '/quizzes'
+- Sends a post request in order to get the next question 
+- Request Body: 
+{'previous_questions':  an array of question id's such as [1, 4, 20, 15]
+'quiz_category': a string of the current category }
+- Returns: a single new question object
+
+**Example of Usage:** `curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"previous_questions": [10], "quiz_category": {"type": "Science", "id": "1"}}'`
+
+**Response:**
+
+```bash
+{
+  "question": {
+    "answer": "The Liver", 
+    "category": "1", 
+    "difficulty": 4, 
+    "id": 20, 
+    "question": "What is the heaviest organ in the human body?"
+  }, 
+  "success": true
+}
+```
+
+#### POST '/questions'
+- Sends a post request in order to add a new question
+- Request Body: 
+```bash
+{
+    'question':  'Heres a new question string',
+    'answer':  'Heres a new answer string',
+    'difficulty': 1,
+    'category': 3,
+}
+```
+- Returns: Does not return any new data
+
+#### POST '/questions/search'
+- Sends a post request in order to search for a specific question by search term 
+
+**Example of Usage:** `curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: application/json" -d '{"searchTerm":"boxer"}'`
+
+**Response:** 
+```bash
+{
+  "questions": [
+    {
+      "answer": "Muhammad Ali", 
+      "category": "4", 
+      "difficulty": 1, 
+      "id": 9, 
+      "question": "What boxer's original name is Cassius Clay?"
+    }
+  ], 
+  "success": true, 
+  "total_questions": 1
+}
+```
 
 ## Acknowledgements 
 - **SVG Icons:** [SVG Repo](https://www.svgrepo.com/)
