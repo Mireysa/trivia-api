@@ -81,6 +81,6 @@ Error messages are returned as JSON objects. See the following example:
 ### Resource Endpoint Library 
 in progress...
 
-## Acknowledgement 
-- **SVG Icons:** https://www.svgrepo.com/
+## Acknowledgements 
+- **SVG Icons:** [SVG Repo](https://www.svgrepo.com/)
 - **Starter Code:** [Udacity](https://github.com/udacity/FSND)
