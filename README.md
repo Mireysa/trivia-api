@@ -78,3 +78,9 @@ Error messages are returned as JSON objects. See the following example:
   "success": false
 }
 ```
+### Resource Endpoint Library 
+in progress...
+
+## Acknowledgement 
+- **SVG Icons:** https://www.svgrepo.com/
+- **Starter Code:** [Udacity](https://github.com/udacity/FSND)
