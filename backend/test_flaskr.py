@@ -1,3 +1,4 @@
+from cgi import test
 import os
 import unittest
 import json
@@ -29,10 +30,70 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
+    # Test ability to obtain paginated questions
+    def test_get_questions(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['questions']))
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(len(data['categories']))
+    
+    # Test and ensure application throws 404 in event page beyond what exists is requested
+    def test_get_questions_404(self):
+        res = self.client().get('/questions?page=99999')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    
+    # Test ability to obtain categories
+    def test_get_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['categories'])
+    
+    # Test and ensure application throws 404 in event specific category is requested
+    def test_get_categories_404(self):
+        res = self.client().get('/categories/99999') # route not configured to func this way
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    # Test ability to DELETE a question given the question ID
+    def test_delete_question(self):
+        
+        # create test question
+        new_test_question = Question(question='How fast can a cheetah run?', answer= '60 mph', difficulty=1, category=1)
+        # insert into the database
+        new_test_question.insert() # ensures we have a question meant just for testing
+
+        # obtain the question ID of the newly created question
+        question_id = new_test_question.id
+       
+        # DELETE the question given the ID
+        res = self.client().delete('/questions/{}'.format(question_id))
+        data = json.loads(res.data)
+
+        # perform query
+        question = Question.query.filter(Question.id == question_id).one_or_none()
+
+        # check status code
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], question_id)
+
+        # ensure that our question does not exist
+        self.assertEqual(question, None)
 
 
 # Make the tests conveniently executable
