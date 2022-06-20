@@ -20,7 +20,12 @@ A trivia game with the intent to create bonding experiences. The application is 
  - [SQLAlchemy](https://www.sqlalchemy.org/) is the Python SQL toolkit and ORM we'll use handle the lightweight sqlite database. 
 
  - [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/#) is the extension we'll use to handle cross origin requests from our frontend server.
-5. **Database Setup** - With Postgres running, restore a database using the trivia.psql file provided. ```psql trivia < trivia.psql ```
+5. **Database Setup** - With Postgres running, restore a database using the trivia.psql file provided. 
+``` bash
+dropdb trivia
+createdb trivia
+psql trivia < trivia.psql 
+```
 6. **Running the Server** - From within the `./src` directory, ensure you are working using your created virtual environment. To run the server, execute:
 ```bash
 export FLASK_APP=flaskr
@@ -38,4 +43,35 @@ The ./frontend directory contains a complete React frontend to display our data 
 4. Run the application in development mode using ```npm start```
 5. Open [http://localhost:3000](http://localhost:3000) to view it in the browser. The page will reload if you make edits.
 
+## Unit Testing
+1. Navigate to `/backend/test_flaskr.py`
+2. Change `database_name` and `database_path` accordingly. 
+3. Run the following commands:
+```bash
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < trivia.psql
+python test_flaskr.py
+```
+## API Reference
+### Getting Started
+- **Base URL:** http://127.0.0.1:5000/ <br>  
+>_NOTE_: Application is meant to run locally.
+- **API Keys:** Not applicable. 
+- **Authentication:** Not applicable.
 
+### Error Handling
+#### Response Codes
+- **404** - resource not found
+- **422** - unprocessable
+- **400** - bad request
+
+#### Error Messages
+Error messages are returned as JSON objects. See the following example:
+```bash
+{
+  "error": 404, 
+  "message": "resource not found", 
+  "success": false
+}
+```
