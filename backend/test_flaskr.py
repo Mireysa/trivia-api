@@ -25,6 +25,9 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
+        
+        self.new_question = {"question": "What is the name of the fruit that resembles Spongebob's home?",
+        "answer": "pineapple", "difficulty": 1, "category": 5}
     
     def tearDown(self):
         """Executed after reach test"""
@@ -94,7 +97,68 @@ class TriviaTestCase(unittest.TestCase):
 
         # ensure that our question does not exist
         self.assertEqual(question, None)
+    
+    # Test and ensure application throws 404 in event question ID requested is not valid for deletion
+    def test_delete_question_404(self):
+        res = self.client().delete('/questions/99999')
+        data = json.loads(res.data)
 
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    # Test ability to create new questions
+    def test_add_question(self):
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["created"])
+    
+    # Test and ensure application throws 422 error in invalid creation of question
+    def test_add_question_422(self):
+        res = self.client().post('/questions', json={}) # empty json data
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+
+    # Test ability to search
+    def test_get_by_search_term(self):
+        res = self.client().post('/questions/search', json={"searchTerm": "boxer"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    # Test ability to search w/o results
+    def test_get_by_search_term_no_results(self):
+        res = self.client().post('/questions/search', json={"searchTerm": "9999999"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    # Test ability to get questions based on category
+    def test_get_by_category(self):
+        res = self.client().get('/categories/2/questions?page=1')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertIsInstance(data['questions'], list)
+        self.assertEqual(data['total_questions'], 4)
+        self.assertEqual(data['current_category'], 2)
+
+    # Test and ensure application throws 404 for invalid category search
+    def test_get_by_category_404(self):
+        res = self.client().get('/categories/99999/questions?page=1')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

@@ -112,7 +112,7 @@ def create_app(test_config=None):
             )
 
         except:
-            abort(422)
+            abort(404)
 
     # endpoint to POST a new question, which will require the question and answer text, category, and difficulty score.
     @app.route('/questions', methods=['POST'])
@@ -203,14 +203,17 @@ def create_app(test_config=None):
             # obtain a count of the total number of questions
             total_questions = len(selection)
 
-            return jsonify(
-                {
-                    "success": True,
-                    "questions": current_questions,
-                    "total_questions": total_questions,
-                    "current_category": category_id
-                }
-            )
+            if total_questions == 0:
+              abort(404)
+            else:
+              return jsonify(
+                  {
+                      "success": True,
+                      "questions": current_questions,
+                      "total_questions": total_questions,
+                      "current_category": category_id
+                  }
+              )
         except:
             abort(404)
 
